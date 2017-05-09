@@ -104,7 +104,7 @@ Provides access to data on built-in JSON files
 		
 		/* Initialization
 		-------------------------------------------------------*/
-		init :function( repo ){
+		init :function( repo, forStrategy ){
 			this.repo = repo;
 			/* to remove deprecated warning
 				http://stackoverflow.com/questions/22090764/alternative-to-async-false-ajax
@@ -138,6 +138,10 @@ Provides access to data on built-in JSON files
 			this._terms.troll = JSON.parse( $.ajax(repo+'lang/data/troll/terms.json', { async: false }).responseText );
 			// other language loaded here
 			this._terms.lang = KC3Translation.getJSON(repo, 'terms', true);
+			// only load terms for Strategy Room on demand
+			if(!!forStrategy){
+				this._terms.extendLang = KC3Translation.getJSON(repo, 'terms_extend', true);
+			}
 			
 			this.updateAircraftTypeIds();
 			return this;
@@ -588,7 +592,10 @@ Provides access to data on built-in JSON files
 		},
 		
 		term: function(key) {
-			return (ConfigManager.info_troll && this._terms.troll[key]) || this._terms.lang[key] || key;
+			return (ConfigManager.info_troll && this._terms.troll[key])
+				|| (this._terms.extendLang && this._terms.extendLang[key])
+				|| this._terms.lang[key]
+				|| key;
 		},
 		
 		nodeLetter : function(worldId, mapId, edgeId) {
