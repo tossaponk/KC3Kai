@@ -67,6 +67,39 @@
 			howler._howls._push.apply(this, arguments);
 		};
 		*/
+	   
+		var PIXIEventEmitter = PIXI.utils.EventEmitter;
+		var _emit = PIXIEventEmitter.prototype.emit;
+
+		PIXIEventEmitter.prototype.emit = function EmitterHook(t, e, r, n, i, o){
+			if( t == "pointerup" ){
+				if( e && e.type == "pointerup" && e.currentTarget ){
+					var targetWindow = window.parent.parent;
+					if( e.currentTarget._page_no !== undefined ){
+						targetWindow.postMessage({type: "questPage", page: e.currentTarget._page_no}, "*");
+					}
+					else if( e.currentTarget._filter !== undefined ){
+						if( !e.currentTarget._selected )
+							targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
+						else
+							targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+					}
+					else if( e.currentTarget.parent && e.currentTarget.parent._next == e.currentTarget ){
+						targetWindow.postMessage({type: "questPage", page: "next"}, "*");
+					}
+					else if( e.currentTarget.parent && e.currentTarget.parent._prev == e.currentTarget ){
+						targetWindow.postMessage({type: "questPage", page: "prev"}, "*");
+					}
+					else if( e.currentTarget.parent && e.currentTarget.parent._first == e.currentTarget ){
+						targetWindow.postMessage({type: "questPage", page: "first"}, "*");
+					}
+					else if( e.currentTarget.parent && e.currentTarget.parent._last == e.currentTarget ){
+						targetWindow.postMessage({type: "questPage", page: "last"}, "*");
+					}
+				}
+			}
+			_emit.apply( this, arguments );
+		}
 
 		console.log("Components hooked!");
 		if (checkerTimer) clearInterval(checkerTimer);

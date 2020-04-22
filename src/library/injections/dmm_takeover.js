@@ -4,6 +4,8 @@
 	var master = {};
 	var meta = {};
 	var quests = {};
+	
+	var fnDisplayQuestInfo = undefined;
 
 	window.DMMCustomizations = {
 		apply: function(response){
@@ -14,6 +16,9 @@
 			meta   = $.extend(true, KC3Meta, response.meta);
 			quests = $.extend(true, KC3QuestManager, response.quests);
 			$.extend(true, RemodelDb, response.remodel);
+			
+			quests.page = 1;
+			quests.filter = 0;
 
 			this.windowFocus();
 			this.attachHTML();
@@ -487,49 +492,78 @@
 				quests = $.extend(true, KC3QuestManager, request.KC3QuestManager);
 				$(".overlay_quests").empty();
 
-				$.each(request.questlist, function( index, QuestRaw ){
-					if( QuestRaw !=- 1 && index < 5 ){
-						const QuestBox = $("#factory .ol_quest_exist").clone();
-						QuestBox.appendTo(".overlay_quests");
-
-						// Get quest data from manager and
-						// rebuild KC3Quest instance because serialized data only keep owned properties
-						const QuestData = new KC3Quest();
-						QuestData.define(quests.get( QuestRaw.api_no ));
-
-						// Show meta, title and description
-						if( QuestData.meta().available ){
-
-							if (config.api_translation){
-								$(".name", QuestBox).text( QuestData.meta().name );
-								$(".desc", QuestBox).text( QuestData.meta().desc );
-							}else{
-								$(".content", QuestBox).css({opacity: 0});
-							}
-
-							if(config.api_tracking){
-								$(".tracking", QuestBox).html( QuestData.outputHtml() );
-								// Special cases multiple requirements, such as Bw1, Bq2
-								if(QuestData.tracking && QuestData.tracking.length > 1){
-									$(".tracking", QuestBox).addClass("small");
-								}
-							}else{
-								$(".tracking", QuestBox).hide();
-							}
-
-						}else{
-							if(config.google_translate) {
-								$(".with_tl", QuestBox).css({ visibility: "hidden" });
-								$(".no_tl", QuestBox).data("qid", QuestRaw.api_no);
-								$(".no_tl", QuestBox).data("qtitle", QuestRaw.api_title);
-								$(".no_tl", QuestBox).data("qdesc", QuestRaw.api_detail);
-								$(".no_tl", QuestBox).show();
-							} else {
-								QuestBox.css({ visibility: "hidden" });
-							}
+				fnDisplayQuestInfo = function(){
+					self.clearOverlays()({action:'clearOverlays'}, {}, function(){});
+					
+					var filtered = [];
+					
+					// These values are pulled from the game code and maybe subject to change in the future
+					var categoryMap = { 2:1, 8:1, 9:1, // 2 8 9 are sortie
+										3:2, // 3 is pvp
+										4:3, // 4 is expedition
+										6:4, // 6 is arsenal
+										1:5, 5:5, 7:5}; // 1 5 7 are other
+					for( var i in request.questlist ){
+						var current = request.questlist[i];
+						if( quests.filter === 0 ){
+							filtered = request.questlist;
+							break;
+						} else if( quests.filter === categoryMap[ current.api_category ] ){
+							filtered.push( current );
 						}
 					}
-				});
+					
+					if( filtered.length === 0 ) return;
+					var maxPage = Math.ceil( filtered.length / 5 ) ;
+					quests.page = quests.page > maxPage ? maxPage : quests.page;
+					
+					var currentList = filtered.slice( 5 * (quests.page - 1), 5 * quests.page );
+					$.each(currentList, function( index, QuestRaw ){
+						if( QuestRaw !=- 1 && index < 5 ){
+							const QuestBox = $("#factory .ol_quest_exist").clone();
+							QuestBox.appendTo(".overlay_quests");
+
+							// Get quest data from manager and
+							// rebuild KC3Quest instance because serialized data only keep owned properties
+							const QuestData = new KC3Quest();
+							QuestData.define(quests.get( QuestRaw.api_no ));
+
+							// Show meta, title and description
+							if( QuestData.meta().available ){
+
+								if (config.api_translation){
+									$(".name", QuestBox).text( QuestData.meta().name );
+									$(".desc", QuestBox).text( QuestData.meta().desc );
+								}else{
+									$(".content", QuestBox).css({opacity: 0});
+								}
+
+								if(config.api_tracking){
+									$(".tracking", QuestBox).html( QuestData.outputHtml() );
+									// Special cases multiple requirements, such as Bw1, Bq2
+									if(QuestData.tracking && QuestData.tracking.length > 1){
+										$(".tracking", QuestBox).addClass("small");
+									}
+								}else{
+									$(".tracking", QuestBox).hide();
+								}
+
+							}else{
+								if(config.google_translate) {
+									$(".with_tl", QuestBox).css({ visibility: "hidden" });
+									$(".no_tl", QuestBox).data("qid", QuestRaw.api_no);
+									$(".no_tl", QuestBox).data("qtitle", QuestRaw.api_title);
+									$(".no_tl", QuestBox).data("qdesc", QuestRaw.api_detail);
+									$(".no_tl", QuestBox).show();
+								} else {
+									QuestBox.css({ visibility: "hidden" });
+								}
+							}
+						}
+					});
+				};
+				
+				fnDisplayQuestInfo();
 				response({success:true});
 			};
 		},
@@ -746,5 +780,24 @@
 			body.appendChild(script);
 		}
 	};
-
+	
+	window.addEventListener("message", function(event){
+		if( event.data.type === "questPage" ){
+			var page = event.data.page;
+			if( !isNaN( page ) )
+				quests.page = event.data.page;
+			else{
+				if( page === "first" )	quests.page = 1;
+				else if( page === "last" ) quests.page = 1000;
+				else if( page === "next" ) quests.page++;
+				else if( page === "prev" ) quests.page--;
+			}
+			
+			fnDisplayQuestInfo();
+		} else if( event.data.type === "questFilter" ){
+			quests.filter = event.data.filter;
+			quests.page = 1;
+			fnDisplayQuestInfo();
+		}
+	});
 })();
