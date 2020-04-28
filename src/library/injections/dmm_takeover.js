@@ -4,6 +4,7 @@
 	var master = {};
 	var meta = {};
 	var quests = {};
+	var questTab = 0;
 	
 	var fnDisplayQuestInfo = undefined;
 
@@ -490,8 +491,12 @@
 				if(!config.api_translation && !config.api_tracking) return true;
 
 				quests = $.extend(true, KC3QuestManager, request.KC3QuestManager);
-				quests.page = 1; // reset page on tab change
+				
+				// Reset page to first page on tab change
+				if( questTab !== request.questtab )
+					quests.page = 1;
 
+				questTab = request.questtab;
 				fnDisplayQuestInfo = function(){
 					$(".overlay_quests").empty();
 					

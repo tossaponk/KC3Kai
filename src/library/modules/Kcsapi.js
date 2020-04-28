@@ -1547,7 +1547,8 @@ Previously known as "Reactor"
 			KC3Network.hasOverlay = true;
 			(new RMsg("service", "questOverlay", {
 				tabId: chrome.devtools.inspectedWindow.tabId,
-				questlist: response.api_data.api_list
+				questlist: response.api_data.api_list,
+				questtab: params.api_tab_id
 			})).execute();
 			
 			// Trigger quest listeners

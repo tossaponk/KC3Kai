@@ -80,20 +80,25 @@
 						targetWindow.postMessage({type: "questPage", page: e.currentTarget._page_no}, "*");
 					}
 					else if( e.currentTarget._filter !== undefined ){
+						if( !e.currentTarget._selected )
+							targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
+						else
+							targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+							
 						var filterNode = e.currentTarget.parent;
 						if( filterHooked != filterNode && filterNode._selected_filter !== undefined ){
-							if( !e.currentTarget._selected )
-								targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
+							// Safeguard in case of function prototype undefined in the future
+							if( filterNode.__proto__.dispose !== undefined ){
+								// Hook dispose function that will be called with navigating away from quest page
+								var _odisp = filterNode.__proto__.dispose;
+								filterNode.__proto__.dispose = function(){
+									// Reset filter on exiting
+									targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+									_odisp.apply( this, arguments );
+								};
+							}
 							else
-								targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
-
-							// Hook dispose function that will be called with navigating away from quest page
-							var _odisp = filterNode.__proto__.dispose;
-							filterNode.__proto__.dispose = function(){
-								// Reset filter on exiting
-								targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
-								_odisp.apply( this, arguments );
-							};
+								console.warn( "Quest filter node dispose function not defined" );
 							
 							//console.log( "Quest filter hooked" );
 							filterHooked = filterNode;

@@ -213,6 +213,7 @@ See Manifest File [manifest.json] under "background" > "scripts"
 			(new TMsg(request.tabId, "gamescreen", "questOverlay", {
 				KC3QuestManager: KC3QuestManager,
 				questlist: request.questlist,
+				questtab: request.questtab,
 				ConfigManager: ConfigManager
 			})).execute();
 		},
