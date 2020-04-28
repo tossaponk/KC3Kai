@@ -490,10 +490,10 @@
 				if(!config.api_translation && !config.api_tracking) return true;
 
 				quests = $.extend(true, KC3QuestManager, request.KC3QuestManager);
-				$(".overlay_quests").empty();
+				quests.page = 1; // reset page on tab change
 
 				fnDisplayQuestInfo = function(){
-					self.clearOverlays()({action:'clearOverlays'}, {}, function(){});
+					$(".overlay_quests").empty();
 					
 					var filtered = [];
 					

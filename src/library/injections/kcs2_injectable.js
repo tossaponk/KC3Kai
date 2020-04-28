@@ -70,6 +70,7 @@
 	   
 		var PIXIEventEmitter = PIXI.utils.EventEmitter;
 		var _emit = PIXIEventEmitter.prototype.emit;
+		var filterHooked = null;
 
 		PIXIEventEmitter.prototype.emit = function EmitterHook(t, e, r, n, i, o){
 			if( t == "pointerup" ){
@@ -79,10 +80,24 @@
 						targetWindow.postMessage({type: "questPage", page: e.currentTarget._page_no}, "*");
 					}
 					else if( e.currentTarget._filter !== undefined ){
-						if( !e.currentTarget._selected )
-							targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
-						else
-							targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+						var filterNode = e.currentTarget.parent;
+						if( filterHooked != filterNode && filterNode._selected_filter !== undefined ){
+							if( !e.currentTarget._selected )
+								targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
+							else
+								targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+
+							// Hook dispose function that will be called with navigating away from quest page
+							var _odisp = filterNode.__proto__.dispose;
+							filterNode.__proto__.dispose = function(){
+								// Reset filter on exiting
+								targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+								_odisp.apply( this, arguments );
+							};
+							
+							//console.log( "Quest filter hooked" );
+							filterHooked = filterNode;
+						}
 					}
 					else if( e.currentTarget.parent && e.currentTarget.parent._next == e.currentTarget ){
 						targetWindow.postMessage({type: "questPage", page: "next"}, "*");
