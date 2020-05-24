@@ -76,16 +76,16 @@
 			if( t == "pointerup" ){
 				if( e && e.type == "pointerup" && e.currentTarget ){
 					var targetWindow = window.parent.parent;
-					if( e.currentTarget._page_no !== undefined ){
-						targetWindow.postMessage({type: "questPage", page: e.currentTarget._page_no}, "*");
+					if( this._page_no !== undefined && this.parent._onNext5 === undefined ){
+						targetWindow.postMessage({type: "questPage", page: this._page_no}, "*");
 					}
-					else if( e.currentTarget._filter !== undefined ){
-						if( !e.currentTarget._selected )
-							targetWindow.postMessage({type: "questFilter", filter: e.currentTarget._filter}, "*");
+					else if( this._filter !== undefined ){
+						if( !this._selected )
+							targetWindow.postMessage({type: "questFilter", filter: this._filter}, "*");
 						else
 							targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
 							
-						var filterNode = e.currentTarget.parent;
+						var filterNode = this.parent;
 						if( filterHooked != filterNode && filterNode._selected_filter !== undefined ){
 							// Safeguard in case of function prototype undefined in the future
 							if( filterNode.__proto__.dispose !== undefined ){
@@ -104,16 +104,16 @@
 							filterHooked = filterNode;
 						}
 					}
-					else if( e.currentTarget.parent && e.currentTarget.parent._next == e.currentTarget ){
+					else if( this.parent && this.parent._next == this ){
 						targetWindow.postMessage({type: "questPage", page: "next"}, "*");
 					}
-					else if( e.currentTarget.parent && e.currentTarget.parent._prev == e.currentTarget ){
+					else if( this.parent && this.parent._prev == this ){
 						targetWindow.postMessage({type: "questPage", page: "prev"}, "*");
 					}
-					else if( e.currentTarget.parent && e.currentTarget.parent._first == e.currentTarget ){
+					else if( this.parent && this.parent._first == this ){
 						targetWindow.postMessage({type: "questPage", page: "first"}, "*");
 					}
-					else if( e.currentTarget.parent && e.currentTarget.parent._last == e.currentTarget ){
+					else if( this.parent && this.parent._last == this ){
 						targetWindow.postMessage({type: "questPage", page: "last"}, "*");
 					}
 				}
