@@ -67,6 +67,59 @@
 			howler._howls._push.apply(this, arguments);
 		};
 		*/
+	   
+		var PIXIEventEmitter = PIXI.utils.EventEmitter;
+		var _emit = PIXIEventEmitter.prototype.emit;
+		var filterHooked = null;
+
+		PIXIEventEmitter.prototype.emit = function EmitterHook(t, e, r, n, i, o){
+			if( t == "pointerup" ){
+				if( e && e.type == "pointerup" && e.currentTarget ){
+					var targetWindow = window.parent.parent;
+					if( this._page_no !== undefined && this.parent._onNext5 === undefined ){
+						targetWindow.postMessage({type: "questPage", page: this._page_no}, "*");
+					}
+					else if( this._filter !== undefined ){
+						if( !this._selected )
+							targetWindow.postMessage({type: "questFilter", filter: this._filter}, "*");
+						else
+							targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+							
+						var filterNode = this.parent;
+						if( filterHooked != filterNode && filterNode._selected_filter !== undefined ){
+							// Safeguard in case of function prototype undefined in the future
+							if( filterNode.__proto__.dispose !== undefined ){
+								// Hook dispose function that will be called with navigating away from quest page
+								var _odisp = filterNode.__proto__.dispose;
+								filterNode.__proto__.dispose = function(){
+									// Reset filter on exiting
+									targetWindow.postMessage({type: "questFilter", filter: 0}, "*");
+									_odisp.apply( this, arguments );
+								};
+							}
+							else
+								console.warn( "Quest filter node dispose function not defined" );
+							
+							//console.log( "Quest filter hooked" );
+							filterHooked = filterNode;
+						}
+					}
+					else if( this.parent && this.parent._next == this ){
+						targetWindow.postMessage({type: "questPage", page: "next"}, "*");
+					}
+					else if( this.parent && this.parent._prev == this ){
+						targetWindow.postMessage({type: "questPage", page: "prev"}, "*");
+					}
+					else if( this.parent && this.parent._first == this ){
+						targetWindow.postMessage({type: "questPage", page: "first"}, "*");
+					}
+					else if( this.parent && this.parent._last == this ){
+						targetWindow.postMessage({type: "questPage", page: "last"}, "*");
+					}
+				}
+			}
+			_emit.apply( this, arguments );
+		}
 
 		console.log("Components hooked!");
 		if (checkerTimer) clearInterval(checkerTimer);
