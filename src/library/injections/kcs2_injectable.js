@@ -104,17 +104,19 @@
 							filterHooked = filterNode;
 						}
 					}
-					else if( this.parent && this.parent._next == this ){
-						targetWindow.postMessage({type: "questPage", page: "next"}, "*");
-					}
-					else if( this.parent && this.parent._prev == this ){
-						targetWindow.postMessage({type: "questPage", page: "prev"}, "*");
-					}
-					else if( this.parent && this.parent._first == this ){
-						targetWindow.postMessage({type: "questPage", page: "first"}, "*");
-					}
-					else if( this.parent && this.parent._last == this ){
-						targetWindow.postMessage({type: "questPage", page: "last"}, "*");
+					else if( this._texture && this._texture.baseTexture.imageUrl.indexOf( "common" ) !== -1 ){
+						if( this.parent && this.parent._next == this ){
+							targetWindow.postMessage({type: "questPage", page: "next"}, "*");
+						}
+						else if( this.parent && this.parent._prev == this ){
+							targetWindow.postMessage({type: "questPage", page: "prev"}, "*");
+						}
+						else if( this.parent && this.parent._first == this ){
+							targetWindow.postMessage({type: "questPage", page: "first"}, "*");
+						}
+						else if( this.parent && this.parent._last == this ){
+							targetWindow.postMessage({type: "questPage", page: "last"}, "*");
+						}
 					}
 				}
 			}
