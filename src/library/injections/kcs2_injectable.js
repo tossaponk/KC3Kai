@@ -104,7 +104,10 @@
 							filterHooked = filterNode;
 						}
 					}
-					else if( this._texture && this._texture.baseTexture.imageUrl.indexOf( "common" ) !== -1 ){
+					else if( this._texture && 
+							 this._texture.baseTexture && 
+							 this._texture.baseTexture.imageUrl && 
+							 this._texture.baseTexture.imageUrl.indexOf( "common" ) !== -1 ){
 						if( this.parent && this.parent._next == this ){
 							targetWindow.postMessage({type: "questPage", page: "next"}, "*");
 						}
