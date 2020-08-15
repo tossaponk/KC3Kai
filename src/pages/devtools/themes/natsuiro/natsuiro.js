@@ -467,7 +467,9 @@
 		$(".module.activity .activity_tab").css("background", ConfigManager.pan_box_bcolor);
 		$(".module.activity .activity_body").css("background", ConfigManager.pan_box_bcolor);
 		$(".module.fleet").css("background", ConfigManager.pan_shiplist_bg);
-		$(".ship_img,.timer-img img").css("background", ConfigManager.pan_ship_icon_bg);
+		$(".ship_img,.timer-img img,.shipIcon img,.pvp_fleet_ship_icon img,.pvp_enemy_pic img"
+			+",.mod_ship_pic img,.expres_ship_img img,.fit_ship_pic img,.assistant_ship img")
+			.css("background", ConfigManager.pan_ship_icon_bg);
 		$(".ship_img,.timer-img img").css("border", "1px solid " + ConfigManager.pan_ship_icon_border);
 
 		// Some text or other elements aren't desirable to drop a shadow from, so these were selected manually.
@@ -1807,7 +1809,7 @@
 								!PlayerManager.combinedFleet && KC3SortieManager.fleetSent == 1;
 							noAirBombingDamage = KC3SortieManager.fleetSent == 1 &&
 								KC3SortieManager.isPlayerNotTakenAirBombingDamage(thisNode, index);
-							spCutinUsed = !!sortieSpecialCutins[index] && KC3SortieManager.fleetSent == 1;
+							spCutinUsed = sortieSpecialCutins[index] == 1 && KC3SortieManager.fleetSent == 1;
 						}
 						(new KC3NatsuiroShipbox(".sship", rosterId, index, showCombinedFleetBars, dameConConsumed, starShellUsed, noAirBombingDamage))
 							.commonElements()
@@ -1839,7 +1841,8 @@
 							starShellUsed = is2ndFleetUsed && (flarePos === index + 1);
 							noAirBombingDamage = is2ndFleetUsed &&
 								KC3SortieManager.isPlayerNotTakenAirBombingDamage(thisNode, index, KC3SortieManager.isCombinedSortie());
-							spCutinUsed = !!sortieSpecialCutins[index] && KC3SortieManager.fleetSent == 2;
+							spCutinUsed = (sortieSpecialCutins[index] == 1 && KC3SortieManager.fleetSent == 2) ||
+								(sortieSpecialCutins[index] == 2 && KC3SortieManager.isCombinedSortie());
 						}
 						(new KC3NatsuiroShipbox(".sship", rosterId, index, showCombinedFleetBars, dameConConsumed, starShellUsed, noAirBombingDamage))
 							.commonElements(true)
@@ -1934,7 +1937,8 @@
 								(isSelectedSortiedFleet || isSelected2ndFleetOnCombined);
 							noAirBombingDamage = isSelectedSortiedFleet && KC3SortieManager.isPlayerNotTakenAirBombingDamage(thisNode, index) ||
 								isSelected2ndFleetOnCombined && KC3SortieManager.isPlayerNotTakenAirBombingDamage(thisNode, index, true);
-							spCutinUsed = !!sortieSpecialCutins[index] && isSelectedSortiedFleet;
+							spCutinUsed = (sortieSpecialCutins[index] == 1 && isSelectedSortiedFleet) ||
+								(sortieSpecialCutins[index] == 2 && isSelected2ndFleetOnCombined);
 						}
 						(new KC3NatsuiroShipbox(".lship", rosterId, index, showCombinedFleetBars, dameConConsumed, starShellUsed, noAirBombingDamage))
 							.commonElements()
@@ -4208,11 +4212,9 @@
 					aa = ship.aa[0],
 					fp = ship.fp[0],
 					tp = ship.tp[0];
-				// TODO asw stats from aircraft seem be quite different for expeditions
-				// https://docs.google.com/spreadsheets/d/1X0ouomAJ02OwHMN7tQRRbMrISkF3RVf4RfZ1Kalhprg/htmlview
-				var asw = /*[101, 102, 110].includes(selectedExpedition) ?
-					ship.nakedAsw() + ship.effectiveEquipmentTotalAsw(ship.isAswAirAttack(), false, true) :*/
-					ship.as[0];
+				// TODO asw stats from aircraft seem be quite complex for expeditions, no proficiency level counted for now
+				// https://wikiwiki.jp/kancolle/%E9%81%A0%E5%BE%81#about_stat
+				var asw = ship.nakedAsw() + ship.effectiveEquipmentTotalAsw(ship.isAswAirAttack(), false, true);
 				if (includeImprove) {
 					// Should be floored after summing up all ships' stats
 					// https://twitter.com/CainRavenK/status/1157636860933337089
@@ -4534,6 +4536,7 @@
 							.clone().appendTo(jq);
 						shipReqBox.text("{0}:{1}"
 							.format(dataReq[index].stypeOneOf.join("/"), dataReq[index].stypeReqCount));
+						// Multiple compo patterns allowed expeds, give tips and mark failure with different color
 						// alternative DE/CVE/CT patterns for exped 4, 5, 9, 42, A3, A4, A5, A6:
 						// https://wikiwiki.jp/kancolle/%E9%81%A0%E5%BE%81#escortninmu
 						if([4, 5, 9, 42, 102, 103, 104, 105].includes(selectedExpedition)) {
@@ -4541,6 +4544,7 @@
 								"(CT:1 + DE:2) / (DD:1 + DE:3) / (CVE:1 + DD:2/DE:2) + ??\n" +
 								KC3Meta.term("ExpedEscortTip")
 							).lazyInitTooltip();
+							if(dataResult[index] === false) shipReqBox.css("color", "lightpink");
 						}
 						// alternative compo with CVL + CL for exped 43
 						else if([43].includes(selectedExpedition)) {
@@ -4548,6 +4552,7 @@
 								"(CVE:1 + DD:2/DE:2) / (CVL:1 + CL/CT/DD:1 + DD/DE:2~4) + ??\n" +
 								KC3Meta.term("ExpedEscortTip")
 							).lazyInitTooltip();
+							if(dataResult[index] === false) shipReqBox.css("color", "lightpink");
 						}
 						if (dataResult[index] === false) {
 							markFailed( shipReqBox );
