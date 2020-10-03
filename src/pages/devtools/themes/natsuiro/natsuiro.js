@@ -127,7 +127,7 @@
 		// data.fleetConf[fleetNum].expedition: a number
 		// data.expedConf: an object
 		// data.expedConf[expedNum]:
-		// * expedNum: 1..45, 100..105, 110..114, 131..132, 141
+		// * expedNum: 1..46, 100..105, 110..114, 131..132, 141..142
 		// * expedNum is number or string, just like fleetNum
 		// data.expedConf[expedNum].greatSuccess: boolean
 
@@ -145,10 +145,10 @@
 				data.fleetConf[i] = { expedition: 1 };
 			}
 			data.expedConf = {};
-			fillExpedConfDefaultGreatSuccess(...Array.numbers(1, 45));
+			fillExpedConfDefaultGreatSuccess(...Array.numbers(1, 46));
 			fillExpedConfDefaultGreatSuccess(...Array.numbers(100, 105));
 			fillExpedConfDefaultGreatSuccess(...Array.numbers(110, 114));
-			fillExpedConfDefaultGreatSuccess(131, 132, 141);
+			fillExpedConfDefaultGreatSuccess(131, 132, 141, 142);
 			localStorage.expedTab = JSON.stringify( data );
 		} else {
 			data = JSON.parse( localStorage.expedTab );
@@ -159,6 +159,7 @@
 			// * extended since 2020-02-07: 45, D1, D2
 			// * extended since 2020-03-27: B5, E1 for World 5
 			// * extended since 2020-05-20: A5, A6
+			// * extended since 2020-09-17: 46, E2
 			if(idToValid > 0 && data.expedConf[idToValid] === undefined) {
 				fillExpedConfDefaultGreatSuccess(idToValid);
 			}
@@ -1316,21 +1317,28 @@
 		Consumables: function(data){
 			$(".activity_basic .consumables").hideChildrenTooltips();
 			const getWarnRscCap = max => Math.floor(max * (ConfigManager.alert_rsc_cap / 100)) || Infinity;
-			const fc200 = PlayerManager.consumables.furniture200 || 0,
+			const fcoin = PlayerManager.consumables.fcoin || 0,
+				fc200 = PlayerManager.consumables.furniture200 || 0,
 				fc400 = PlayerManager.consumables.furniture400 || 0,
 				fc700 = PlayerManager.consumables.furniture700 || 0,
 				fcboxestot = fc200 * 200 + fc400 * 400 + fc700 * 700;
+			const screws = PlayerManager.consumables.screws || 0,
+				medals = PlayerManager.consumables.medals || 0,
+				presents = PlayerManager.consumables.presents || 0,
+				exchgscrewstot = presents + medals * 4;
 			$(".count_fcoin")
-				.text( KC3Meta.formatNumber(PlayerManager.consumables.fcoin || 0) )
+				.text( KC3Meta.formatNumber(fcoin) )
 				.toggleClass("hardCap", PlayerManager.consumables.fcoin >= getWarnRscCap(PlayerManager.maxCoin))
 				.attr("title", KC3Meta.term("ConsumablesFCoinBoxes").format(...[fc200, fc200 * 200, fc400, fc400 * 400, fc700, fc700 * 700,
-					fcboxestot, fcboxestot + (PlayerManager.consumables.fcoin || 0)].map((n) => KC3Meta.formatNumber(n)))).lazyInitTooltip();
+					fcboxestot, fcboxestot + fcoin].map((n) => KC3Meta.formatNumber(n)))).lazyInitTooltip();
 			$(".count_buckets")
 				.text( KC3Meta.formatNumber(PlayerManager.consumables.buckets || 0) )
 				.toggleClass("hardCap", PlayerManager.consumables.buckets >= getWarnRscCap(PlayerManager.maxConsumable));
 			$(".count_screws")
-				.text( KC3Meta.formatNumber(PlayerManager.consumables.screws || 0) )
-				.toggleClass("hardCap", PlayerManager.consumables.screws >= getWarnRscCap(PlayerManager.maxConsumable));
+				.text( KC3Meta.formatNumber(screws) )
+				.toggleClass("hardCap", PlayerManager.consumables.screws >= getWarnRscCap(PlayerManager.maxConsumable))
+				.attr("title", KC3Meta.term("ConsumablesScrewExchanges").format(...[medals, medals * 4, presents, presents,
+					exchgscrewstot, exchgscrewstot + screws].map((n) => KC3Meta.formatNumber(n)))).lazyInitTooltip();
 			$(".count_torch")
 				.text( KC3Meta.formatNumber(PlayerManager.consumables.torch || 0) )
 				.toggleClass("hardCap", PlayerManager.consumables.torch >= getWarnRscCap(PlayerManager.maxConsumable));
@@ -1378,10 +1386,10 @@
 			const firstItemId = PlayerManager.consumables.mackerel ? 68 :
 				PlayerManager.consumables.sardine ? 93 :
 				PlayerManager.consumables.setsubunBeans ? 90 :
-				PlayerManager.consumables.hishimochi ? 62 : 60;
+				PlayerManager.consumables.hishimochi ? 62 : 56;
 			$(".count_eventItemOrPresent").text(PlayerManager.getConsumableById(firstItemId) || 0)
 				.prev().attr("title", KC3Meta.useItemName(firstItemId))
-				.children("img").attr("src", `/assets/img/useitems/${firstItemId}.png`);
+				.children("img").attr("src", KC3Meta.useitemIcon(firstItemId, 1));
 			// Count all consumable slotitems via GearManager
 			const consumableSlotitemMap = {
 				"50": { "slotitem":  42 }, // repairTeam
@@ -1405,8 +1413,17 @@
 				$(`.count_${attrName}`).text(amount).prev().attr("title", KC3Meta.useItemName(useitemId));
 			};
 			// Total items of 1 page should be 3 x 3 for current page layout and styles
-			[52, 57, 58, 61, 64, 65, 70, 71, 74, 75, 77, 78, 91, 92].forEach(updateCountByUseitemId);
+			[52, 57, 64, 65, 70, 71, 75, 77, 78, 91, 92, 94].forEach(updateCountByUseitemId);
 			// Update amounts of combined counting
+			$(".count_eventMedals").text(PlayerManager.consumables.firstClassMedals || 0)
+				.parent().attr("title", "x{0} {1}\nx{2} {3}\nx{4} {5}".format(
+					PlayerManager.consumables.firstClassMedals || 0, KC3Meta.useItemName(61),
+					PlayerManager.consumables.straitMedal || 0, KC3Meta.useItemName(79),
+					(PlayerManager.consumables.shogoMedalHard ||
+						PlayerManager.consumables.shogoMedalNormal ||
+						PlayerManager.consumables.shogoMedalEasy ||
+						PlayerManager.consumables.shogoMedalCasual || 0), KC3Meta.useItemName(81)
+				));
 			$(".count_repair").text(consumableSlotitemMap[50].amount + consumableSlotitemMap[51].amount)
 				.parent().attr("title", "x{0} {1} +\nx{2} {3}".format(
 					consumableSlotitemMap[50].amount, KC3Meta.useItemName(50),
@@ -1423,6 +1440,11 @@
 				.parent().attr("title", "x{0} {1} +\nx{2} {3}".format(
 					PlayerManager.consumables.mamiya || 0, KC3Meta.useItemName(54),
 					PlayerManager.consumables.irako || 0, KC3Meta.useItemName(59)
+				));
+			$(".count_allBlueprints").text((PlayerManager.consumables.blueprints || 0) + (PlayerManager.consumables.newAircraftBlueprint || 0))
+				.parent().attr("title", "x{0} {1} +\nx{2} {3}".format(
+					PlayerManager.consumables.blueprints || 0, KC3Meta.useItemName(58),
+					PlayerManager.consumables.newAircraftBlueprint || 0, KC3Meta.useItemName(74)
 				));
 			// Update 1 more page for food(or any item?) collecting event
 			if(KC3Meta.isDuringFoodEvent()){
@@ -3262,7 +3284,7 @@
 				// Keep old style icon shown if drop spoiler is disabled
 				if(ConfigManager.info_drop) {
 					$(".module.activity .battle_fish img")
-						.attr("src", `/assets/img/useitems/${thisNode.dropUseitem}.png`).addClass("rounded")
+						.attr("src", KC3Meta.useitemIcon(thisNode.dropUseitem, 1)).addClass("rounded")
 						.error(function() {
 							$(this).off("error").removeClass("rounded")
 								.attr("src", "/assets/img/ui/map_drop.png");
@@ -3937,7 +3959,7 @@
 					const consumeUseItemBox = $(".remodel_consume_item:not(.useitem)", consumeList).clone();
 					consumeUseItemBox.addClass("useitem").show().appendTo(consumeList);
 					$(".remodel_slot_icon img", consumeUseItemBox)
-						.attr("src", `/assets/img/useitems/${useitemId}.png`);
+						.attr("src", KC3Meta.useitemIcon(useitemId, 1));
 					$(".remodel_slot_name", consumeUseItemBox)
 						.text(KC3Meta.useItemName(useitemId))
 						.attr("title", KC3Meta.useItemName(useitemId));
@@ -3947,7 +3969,7 @@
 					const ownedUseitemBox = $(".owned_use_items.first", remodelDetailBox).clone()
 						.removeClass("first")
 						.appendTo($(".remodel_consumptions", remodelDetailBox));
-					$("img", ownedUseitemBox).attr("src", `/assets/img/useitems/${useitemId}.png`);
+					$("img", ownedUseitemBox).attr("src", KC3Meta.useitemIcon(useitemId, 1));
 					$(".value", ownedUseitemBox)
 						.text("x{0}".format(useitemAmount))
 						.toggleClass("red", useitemAmount < useitemNum);

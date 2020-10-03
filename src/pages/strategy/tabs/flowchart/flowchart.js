@@ -40,6 +40,7 @@
 			this.seedBranch( rootQuestTree, 434 ); // D32
 			this.seedBranch( rootQuestTree, 437 ); // D34
 			this.seedBranch( rootQuestTree, 438 ); // D35
+			this.seedBranch( rootQuestTree, 439 ); // D36
 			this.seedBranch( rootQuestTree, 503 ); // Ed3
 			this.seedBranch( rootQuestTree, 605 ); // Fd1
 			this.seedBranch( rootQuestTree, 702 ); // Gd2
@@ -53,6 +54,7 @@
 			this.seedBranch( rootQuestTree, 904 ); // By1
 			this.seedBranch( rootQuestTree, 905 ); // By2
 			this.seedBranch( rootQuestTree, 912 ); // By3
+			this.seedBranch( rootQuestTree, 928 ); // By5
 			
 			// Other non-flowchart quests
 			const rootQuestList = $(".tab_flowchart .extralist ul.questList");
