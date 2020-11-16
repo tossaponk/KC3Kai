@@ -1,6 +1,6 @@
 (function(){
 	"use strict";
-	_gaq.push(['_trackEvent', "Panel: Natsuiro Theme", 'clicked']);
+	_gaq.push(['_trackEvent', "Panel: Moonlight Theme", 'clicked']);
 
 	// Mathematical Constants
 	var LOG3 = Math.log10(3);
@@ -1216,7 +1216,7 @@
 		$(".module.activity .battle_night").attr("title", KC3Meta.term("BattleNightNeeded")).lazyInitTooltip();
 		$(".module.activity .battle_rating img").attr("src", "../../../../assets/img/ui/dark_rating.png").css("opacity", "");
 		$(".module.activity .battle_rating").attr("title", KC3Meta.term("BattleRating")).lazyInitTooltip();
-		$(".module.activity .battle_drop img").attr("src", "../../../../assets/img/ui/dark_shipdrop.png");
+		$(".module.activity .battle_drop img").attr("src", "../../../../assets/img/ui/dark_shipdrop.png").removeClass("rounded");
 		$(".module.activity .battle_drop").removeData("masterId").off("dblclick").removeClass("new_ship");
 		$(".module.activity .battle_drop").attr("title", "").lazyInitTooltip();
 		$(".module.activity .battle_cond_value").text("");
@@ -3521,6 +3521,7 @@
 				// If drop spoiler is enabled on settings
 				if(ConfigManager.info_drop) {
 					$(".module.activity .battle_drop img")
+						.addClass("rounded")
 						.attr("src", KC3Meta.shipIcon(thisNode.drop, undefined, false));
 					$(".module.activity .battle_drop")
 						.data("masterId", thisNode.drop)
@@ -3537,7 +3538,10 @@
 				this.GearSlots({});
 			} else {
 				$(".module.activity .battle_drop img")
-					.attr("src", "/assets/img/ui/dark_shipdrop-x.png");
+					.removeClass("rounded")
+					.attr("src", ConfigManager.info_troll ?
+						"/assets/img/ui/jervaited.png" :
+						"/assets/img/ui/dark_shipdrop-x.png");
 			}
 
 			// Show TP deduction
@@ -4951,22 +4955,13 @@
 				});
 				const stats = equipBonus.stats;
 				const statsBox = $("<div></div>").addClass("statsBox border_radius_5").addClass(ConfigManager.pan_moon_element_shape);
-				const statsTermKeyMap = {
-					"fp": "ShipFire",
-					"tp": "ShipTorpedo",
-					"aa": "ShipAntiAir",
-					"ar": "ShipArmor",
-					"ev": "ShipEvasion",
-					"as": "ShipAsw",
-					"ls": "ShipLos",
-				};
 				for (const key in stats) {
 					if (stats[key] !== 0) {
 						$("<div></div>").appendTo(statsBox)
 							.append($("<img/>").attr("src", KC3Meta.statIcon(key)))
 							.append($("<span></span>")
 								.text("{0}{1}".format(stats[key] >= 0 ? "+" : "", stats[key])))
-							.attr("title", KC3Meta.term(statsTermKeyMap[key]) || key)
+							.attr("title", KC3Meta.statNameTerm(key) || key)
 							.lazyInitTooltip();
 					}
 				}
