@@ -21,7 +21,7 @@ Saves and loads list to and from localStorage
 		antiLandDiveBomberIds: [64,148,233,277,305,306,319],
 		// WiP modifiers applied to enemy fleet's AA fire formula:
 		// https://wikiwiki.jp/kancolle/%E5%AF%BE%E7%A9%BA%E7%A0%B2%E7%81%AB#avoid_AAfire
-		evadeAntiAirFireIds: [79,80,81,93,94,99,100,143,144,154,170,199,200,224,237,319,320,322,323,343,374,388],
+		evadeAntiAirFireIds: [79,80,81,93,94,99,100,143,144,154,170,199,200,224,237,319,320,322,323,343,374,388,404],
 		highAltitudeInterceptorIds: [350,351,352],
 		airStrikeBomberType2Ids: [7,8,11,41,47,53,57,58],
 		aswAircraftType2Ids: [7,8,11,25,26,41,47,57,58],
@@ -34,17 +34,17 @@ Saves and loads list to and from localStorage
 		landBaseSupplyBauxiteCostPerSlot: 5,
 		landBaseSupplyFuelCostPerSlot: 3,
 		landBaseBomberSortieFuelCostPerSlot: 1.5,
-		landBaseReconnSortieFuelCostPerSlot: 1.0,
 		landBaseOtherSortieFuelCostPerSlot: 1.0,
-		landBaseBomberSortieAmmoCostPerSlot: 0.67,
-		landBaseReconnSortieAmmoCostPerSlot: 0.75,
-		landBaseOtherSortieAmmoCostPerSlot: 0.62,
+		landBaseBomberSortieAmmoCostPerSlot: 0.64,
+		landBaseOtherSortieAmmoCostPerSlot: 0.6,
 		landBaseReconnMaxSlot: 4,
 		landBaseOtherMaxSlot: 18,
 		landBaseReconnType2Ids: [9,10,41,49],
 		// Newly implemented heavy bomber different max slot
 		landBaseHeavyBomberMaxSlot: 9,
 		landBaseHeavyBomberType2Ids: [53],
+		landBaseHeavyBomberSortieFuelCostPerSlot: 2,
+		landBaseHeavyBomberSortieAmmoCostPerSlot: 2,
 		// Jet aircraft mechanism still in progress
 		jetAircraftType2Ids: [56,57,58,59],
 		jetBomberSteelCostRatioPerSlot: 0.2,
