@@ -1601,7 +1601,7 @@
 				if(slotitem) amount = slotitem.amount;
 				$(`.consumable_display .count_${attrName}`).text(amount).parent().attr("title", KC3Meta.useItemName(useitemId));
 			};
-			[4, 10, 11, 12, 50, 51, 52, 54, 56, 59, 57, 58, 60, 61, 64, 65, 66, 67, 69, 70, 71, 74, 75, 76, 77, 78, 90, 91, 92, 94].forEach(updateCountByUseitemId);
+			[4, 10, 11, 12, 50, 51, 52, 54, 56, 59, 57, 58, 60, 61, 62, 64, 65, 66, 67, 69, 70, 71, 74, 75, 76, 77, 78, 90, 91, 92, 94].forEach(updateCountByUseitemId);
 			$(".count_sumScrews").text(
 				(PlayerManager.getConsumableById(4) || 0) +    // screws
 				(PlayerManager.getConsumableById(60) || 0) +   // 1 present box => 1 screw
@@ -2285,7 +2285,6 @@
 				$(".summary-eqlos .summary_textf332").text( "x2: {1}".format(f33Cn) );
 				$(".summary-eqlos .summary_textf333").text( "x3: {2}".format(f33Cn) );
 				$(".summary-eqlos .summary_textf334").text( "x4: {3}".format(f33Cn) );
-			// No reference values for combined fleet yet, only show computed values
 			} else if(selectedFleet === 5){
 				const mainFleet = PlayerManager.fleets[0],
 					escortFleet = PlayerManager.fleets[1],
@@ -3201,7 +3200,7 @@
 							
 							if(index === 0) {
 								if(['multiple', 'gauge-hp'].includes(KC3SortieManager.getCurrentMapData().kind)) {
-									updateMapGauge(KC3SortieManager.currentNode().gaugeDamage, !newEnemyHP);
+									updateMapGauge(thisNode.gaugeDamage, thisNode.mainFlagshipKilled);
 								}
 								$(enemyFleetBoxSelector+" .sunk_"+(index+1)).toggleClass("debuff", newEnemyHP > 0 && !!thisNode.debuffed);
 							}
@@ -3445,7 +3444,7 @@
 						
 						if(index === 0) {
 							if(['multiple', 'gauge-hp'].includes(KC3SortieManager.getCurrentMapData().kind)) {
-								updateMapGauge(KC3SortieManager.currentNode().gaugeDamage, !newEnemyHP);
+								updateMapGauge(thisNode.gaugeDamage, thisNode.mainFlagshipKilled);
 							}
 							if(!thisNode.enemyCombined || thisNode.activatedEnemyFleet === 1) {
 								$(".module.activity .abyss_single .sunk_"+(index+1)).toggleClass("debuff", newEnemyHP > 0 && !!thisNode.debuffed);
@@ -5208,10 +5207,10 @@
 			thisMap   = KC3SortieManager.getCurrentMapData(),
 			mapHP     = 0,
 			onBoss    = KC3SortieManager.currentNode().isValidBoss(),
-			depleteOK = onBoss || !!noBoss;
+			depleteOK = onBoss || !!noBoss,
+			mainFsKill= !!fsKill;
 
 		// Normalize Parameters
-		fsKill = !!fsKill;
 		gaugeDmg = (gaugeDmg || 0) * (depleteOK);
 
 		if(Object.keys(thisMap).length > 0){
@@ -5228,7 +5227,7 @@
 					// Reduce current map HP with known gauge damage given
 					mapHP = thisMap.curhp - gaugeDmg;
 					// Normalize the gauge until flagship sinking flag
-					mapHP = Math.max(mapHP,!fsKill);
+					mapHP = Math.max(mapHP, mainFsKill ? 0 : 1);
 
 					var rate = [mapHP,thisMap.curhp].sort(function(a,b){
 						return b-a;
@@ -5250,7 +5249,7 @@
 					console.debug("Map " + thisMapId + " total kills:", totalKills);
 					var
 						killsLeft  = totalKills - thisMap.kills + (!onBoss && !!noBoss),
-						postBounty = killsLeft - (depleteOK && fsKill);
+						postBounty = killsLeft - (depleteOK && mainFsKill);
 					if(totalKills){
 						$(".module.activity .map_hp")
 							.text( killsLeft + " / " + totalKills + KC3Meta.term("BattleMapKills"));
